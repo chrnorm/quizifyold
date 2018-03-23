@@ -5,13 +5,49 @@ import './App.css';
 import SpotifyWebApi from 'spotify-web-api-js';
 const spotifyApi = new SpotifyWebApi();
 
-function MusicTrack(props) {
-  return (
-    <div className="trackWrapper">
-      <span className="trackName">{props.track.trackname}</span>
-      <span className="trackArtist" style={{marginLeft: 20 + 'px'}}>{props.track.artist}</span>
-    </div>
-  );
+
+class TrackList extends Component {
+  render () {
+    var tracks = this.props.tracks.map((track, index) => {
+      return (
+        <TrackListItem key={index} track={track} index={index} selectTrack={this.props.selectTrack}/>
+      );
+    });
+    return (
+      <ul className="list-group"> {tracks} </ul>
+    );
+  }
+}
+
+class TrackListItem extends Component {
+  constructor(props) {
+    super(props);
+    this.onClickClose = this.onClickClose.bind(this);
+    this.onClickDone = this.onClickDone.bind(this);
+    this.onSelectTrack = this.onSelectTrack.bind(this);
+  }
+  onClickClose() {
+    var index = parseInt(this.props.index);
+    this.props.removeItem(index);
+    this.props.removeItem(index);
+  }
+  onClickDone() {
+    var index = parseInt(this.props.index);
+    this.props.markTodoDone(index);
+  }
+  onSelectTrack() {
+    var index = parseInt(this.props.index);
+    this.props.selectTrack(index);
+  }
+
+  render () {
+    return(
+      <li key={this.props.track.trackname}>
+      <button onClick={this.onSelectTrack}>Select</button>
+      <span>{this.props.track.trackname}</span><span style={{marginLeft: 20 + 'px'}}>{this.props.track.artist}</span>
+    </li>
+    );
+  }
 }
 
 class MusicPlayer extends Component {
@@ -34,6 +70,7 @@ class MusicPlayer extends Component {
 
   componentDidUpdate() {
     this.refs.audio.load();
+    this.refs.audio.play();
   }
 
   render() {
@@ -45,6 +82,37 @@ class MusicPlayer extends Component {
   }
 }
 
+class QuizQuestion extends Component {
+  constructor(params){
+    super();
+    this.selectTrack = this.selectTrack.bind(this);
+  }
+  selectTrack(trackId) {
+    if(trackId == this.props.correctTrackIndex) {
+      console.log("Correct track selected - ID " + trackId.toString())
+    } else {
+      console.log("Incorrect track selected - ID " + trackId.toString())      
+    }
+    this.props.onEndOfQuestion();
+  }
+  render() {
+    return (
+      <div>
+      <MusicPlayer audio={ this.props.audio_url} />
+      <TrackList tracks= {this.props.tracks} selectTrack={this.selectTrack}/>
+      </div>
+    );
+  }
+}
+
+// function QuizWrapper(props) {
+//   if(displayingAnswer) {
+//     return 
+//   } else {
+//     return 
+//   }
+// }
+
 class App extends Component {
   constructor(){
     super();
@@ -55,12 +123,13 @@ class App extends Component {
     }
     this.state = {
       loggedIn: token ? true : false,
-      track1: {trackname: '', artist: ''},
-      track2: {trackname: '', artist: ''},
-      track3: {trackname: '', artist: ''},
-      track4: {trackname: '', artist: ''},
       audio_url: '',
+      correctTrackIndex: 0,
+      tracks: [],
+      displayingAnswer: true,
     }
+    this.selectTrack = this.selectTrack.bind(this);
+    this.onEndOfQuestion = this.onEndOfQuestion.bind(this);
   }
   getHashParams() {
     var hashParams = {};
@@ -73,29 +142,36 @@ class App extends Component {
     }
     return hashParams;
   }
+  onEndOfQuestion() {
+    this.setState({displayingAnswer: true});
+  }
+
+  selectTrack(trackId) {
+    if(trackId == this.state.correctTrackIndex) {
+      console.log("Correct track selected - ID " + trackId.toString())
+    } else {
+      console.log("Incorrect track selected - ID " + trackId.toString())      
+    }
+  }
+
   getNextQuestion() {
     spotifyApi.getMySavedTracks()
       .then((response) => {
-        console.log(response);
-        var randomIndexes = Array.from({length: 4}, () => Math.floor(Math.random() * 20));
+        var randomIndexes = Array.from({length: 5}, () => Math.floor(Math.random() * 20));
+        var correctTrackInd = Math.floor(Math.random() * randomIndexes.length);
+        var tracksToUpdate = [];
+        console.log("Correct track is " + response.items[randomIndexes[correctTrackInd]].track.name)
+        for(var i in randomIndexes) {
+          tracksToUpdate.push({
+            trackname: response.items[randomIndexes[i]].track.name,
+            artist: response.items[randomIndexes[i]].track.artists[0].name,
+          });
+        }
         this.setState({
-          track1: {
-            trackname: response.items[randomIndexes[0]].track.name,
-            artist: response.items[randomIndexes[0]].track.artists[0].name
-          },
-          track2: {
-            trackname: response.items[randomIndexes[1]].track.name,
-            artist: response.items[randomIndexes[1]].track.artists[0].name
-          },
-          track3: {
-            trackname: response.items[randomIndexes[2]].track.name,
-            artist: response.items[randomIndexes[2]].track.artists[0].name
-          },
-          track4: {
-            trackname: response.items[randomIndexes[3]].track.name,
-            artist: response.items[randomIndexes[3]].track.artists[0].name
-          },
-          audio_url: response.items[randomIndexes[0]].track.preview_url
+          audio_url: response.items[randomIndexes[correctTrackInd]].track.preview_url,
+          correctTrackIndex: correctTrackInd,
+          tracks: tracksToUpdate,
+          displayingAnswer: false
         });
       })
   }
@@ -110,11 +186,7 @@ class App extends Component {
           </button>
         }
       </div>
-      <MusicTrack track={ this.state.track1 } />
-      <MusicTrack track={ this.state.track2 } />
-      <MusicTrack track={ this.state.track3 } />
-      <MusicTrack track={ this.state.track4 } />
-      <MusicPlayer audio={ this.state.audio_url} />
+      <QuizQuestion correctTrackIndex={this.state.correctTrackIndex} audio_url={this.state.audio_url} tracks={this.state.tracks} onEndOfQuestion={this.onEndOfQuestion}/>
       </div>
     );
   }
