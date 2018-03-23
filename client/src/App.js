@@ -22,18 +22,7 @@ class TrackList extends Component {
 class TrackListItem extends Component {
   constructor(props) {
     super(props);
-    this.onClickClose = this.onClickClose.bind(this);
-    this.onClickDone = this.onClickDone.bind(this);
     this.onSelectTrack = this.onSelectTrack.bind(this);
-  }
-  onClickClose() {
-    var index = parseInt(this.props.index);
-    this.props.removeItem(index);
-    this.props.removeItem(index);
-  }
-  onClickDone() {
-    var index = parseInt(this.props.index);
-    this.props.markTodoDone(index);
   }
   onSelectTrack() {
     var index = parseInt(this.props.index);
@@ -75,7 +64,7 @@ class MusicPlayer extends Component {
 
   render() {
     return (
-      <audio ref="audio" controls>
+      <audio ref="audio" controls autoPlay={true}>
         <source src={this.state.audio} />
       </audio>
     );
@@ -93,7 +82,7 @@ class QuizQuestion extends Component {
     } else {
       console.log("Incorrect track selected - ID " + trackId.toString())      
     }
-    this.props.onEndOfQuestion();
+    this.props.onEndOfQuestion(trackId);
   }
   render() {
     return (
@@ -105,13 +94,22 @@ class QuizQuestion extends Component {
   }
 }
 
-// function QuizWrapper(props) {
-//   if(displayingAnswer) {
-//     return 
-//   } else {
-//     return 
-//   }
-// }
+function QuizWrapper(props) {
+  if(props.displayingAnswer) {
+    return (<QuizAnswer selectedTrackIndex={props.selectedTrackIndex} correctTrackIndex={props.correctTrackIndex}/>);
+  } else {
+    return (<QuizQuestion correctTrackIndex={props.correctTrackIndex} audio_url={props.audio_url} tracks={props.tracks} onEndOfQuestion={props.onEndOfQuestion}/>);
+  }
+}
+
+function QuizAnswer(props) {
+  if(props.selectedTrackIndex == props.correctTrackIndex) {
+    return (<div>Correct!</div>);
+  } else {
+    return (<div>Incorrect!</div>);
+  }
+  
+}
 
 class App extends Component {
   constructor(){
@@ -125,6 +123,7 @@ class App extends Component {
       loggedIn: token ? true : false,
       audio_url: '',
       correctTrackIndex: 0,
+      selectedTrackIndex: 0,
       tracks: [],
       displayingAnswer: true,
     }
@@ -142,8 +141,11 @@ class App extends Component {
     }
     return hashParams;
   }
-  onEndOfQuestion() {
-    this.setState({displayingAnswer: true});
+  onEndOfQuestion(selTrackIndex) {
+    this.setState({
+      displayingAnswer: true,
+      selectedTrackIndex: selTrackIndex
+    });
   }
 
   selectTrack(trackId) {
@@ -152,6 +154,7 @@ class App extends Component {
     } else {
       console.log("Incorrect track selected - ID " + trackId.toString())      
     }
+    this.setState({selectedTrackIndex: trackId});
   }
 
   getNextQuestion() {
@@ -186,7 +189,7 @@ class App extends Component {
           </button>
         }
       </div>
-      <QuizQuestion correctTrackIndex={this.state.correctTrackIndex} audio_url={this.state.audio_url} tracks={this.state.tracks} onEndOfQuestion={this.onEndOfQuestion}/>
+      <QuizWrapper selectedTrackIndex={this.state.selectedTrackIndex} displayingAnswer={this.state.displayingAnswer} correctTrackIndex={this.state.correctTrackIndex} audio_url={this.state.audio_url} tracks={this.state.tracks} onEndOfQuestion={this.onEndOfQuestion}/>
       </div>
     );
   }
