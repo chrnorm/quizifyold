@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "Quizify",
+  "name": "Quizify: The Spotify Music Quiz",
   "icons": [
     {
       "src": "favicon.ico",
