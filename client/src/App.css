@@ -1,29 +1,33 @@
 body, html, #root {
-  height: 100%;
-  margin: 0;
-  overflow: hidden;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
 }
 
 .App {
-  height: 100%;
-  background-color: #ffffff;
-  background-image: url("https://www.transparenttextures.com/patterns/asfalt-dark.png");
-  color: white;
+    height: 100%;
+    background-color: #ffffff;
+    background-image: url("https://www.transparenttextures.com/patterns/asfalt-dark.png");
+    color: white;
+}
+
+.BoxWrapper {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    margin: auto;
+    max-width: 100%;
+    max-height: 100%;
+    height: 400px;
+    width: 600px;
 }
 
 .MainBox {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  margin: auto;
-  max-width: 100%;
-  max-height: 100%;
-  overflow: auto;
-  height: 400px;
-  width: 600px;
-  background: #666;
+    height: 400px;
+    width: 600px;
+    background: #666;
 }
 
 li.tracklistitem {
@@ -33,6 +37,12 @@ li.tracklistitem {
     background: #484848;
     color: white;
     padding: 8px;
+    height: 20px;
+}
+
+span.itemtrackname {
+    display: inline-flex;
+    float: left;
 }
 
 span.itemtrackartist {

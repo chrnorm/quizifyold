@@ -3,6 +3,7 @@ import './App.css';
 
 import SpotifyWebApi from 'spotify-web-api-js';
 import ReactAudioPlayer from 'react-audio-player';
+import ReactCardFlip from 'react-card-flip';
 const spotifyApi = new SpotifyWebApi();
 
 
@@ -251,14 +252,17 @@ class QuizContainer extends Component {
     return (
       <div>
       <MusicLibraryContainer access_token={this.token} shouldUpdateTracks={this.state.displayingAnswer} onTracksUpdated={this.onTracksUpdated}/>
-      {this.state.displayingAnswer ? (
-        <div className='quizanswer'>
-        <QuizAnswer correctAnswer={this.state.lastAnswerCorrect} />
-        <button onClick={() => this.getNextQuestion()}>Get Next Question</button>
-        </div>
-      ) : (
-        <QuizQuestion correctTrackIndex={this.state.correctTrackIndex} audio_url={this.state.audio_url} tracks={this.state.tracks} onEndOfQuestion={this.onEndOfQuestion} />
-      )}
+      <ReactCardFlip isFlipped={!this.state.displayingAnswer}>
+      <div className='MainBox' key='front'>
+      <div className='quizanswer'>
+      { this.state.displayingAnswer &&  <QuizAnswer correctAnswer={this.state.lastAnswerCorrect} /> }
+      {this.state.displayingAnswer && <button onClick={() => this.getNextQuestion()}>Get Next Question</button>} 
+      </div>
+      </div>
+      <div className='MainBox' key='back'>
+      { this.state.displayingAnswer || <QuizQuestion correctTrackIndex={this.state.correctTrackIndex} audio_url={this.state.audio_url} tracks={this.state.tracks} onEndOfQuestion={this.onEndOfQuestion} />}
+      </div>
+      </ReactCardFlip>
       </div>
     );
   }
@@ -296,15 +300,13 @@ class App extends Component {
   render() {
     return (
       <div className='App'>
-      <div className='MainBox'>
-      <div>
+      <div className='BoxWrapper'>
       { this.state.loggedIn ? (
         <QuizContainer access_token={this.token} />
       ) : (
         <a href='http://localhost:8888/login/'> Login to Spotify </a>
       )
     }
-    </div>
     </div>
     </div>
   );
