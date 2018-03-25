@@ -1,7 +1,3 @@
-div, button {
-  margin: 10px;
-}
-
 body, html, #root {
   height: 100%;
   margin: 0;
@@ -31,7 +27,7 @@ body, html, #root {
 }
 
 li.tracklistitem {
-    margin-top: 10px;
+    margin-top: 15px;
     list-style-type: none;
     cursor: pointer;
     background: #484848;
@@ -45,11 +41,11 @@ span.itemtrackartist {
 
 audio {
     margin: auto;
-    display: flex;
+    display: none;
 }
 
 ul.list-group {
-    margin-top: 30px;
+    margin: 80px 30px;
     padding: 0;
 }
 
@@ -58,4 +54,28 @@ ul.list-group {
     margin: auto;
     width: 150px;
     text-align: center;
+}
+
+.countdownbar {
+    height: 5px;
+    background-color: red;
+}
+
+button {
+    background-color: red;
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    margin-top: 20px;
+    display: inline-block;
+    font-size: 16px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, .6);
+    border-radius: 8px;
+    transition: background-color .3s;
+}
+
+button:hover,button:focus {
+    background-color: #cc0000;
+    cursor: pointer;
+    outline: 0;
 }

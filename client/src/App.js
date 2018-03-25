@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import './App.css';
 
 import SpotifyWebApi from 'spotify-web-api-js';
+import ReactAudioPlayer from 'react-audio-player';
 const spotifyApi = new SpotifyWebApi();
 
 
@@ -37,42 +38,57 @@ class TrackListItem extends Component {
   }
 }
 
-class MusicPlayer extends Component {
+class MusicPlayerContainer extends Component {
   constructor(props){
     super(props);
     this.state = {
-      audio: props.audio
+      audio_url: props.audio,
+      percentLeft: 100
+    }
+    this.onListen = this.onListen.bind(this);
+  }
+  
+  onListen(audioCurrentTime) {
+    var nextPercentLeft = (( 10 - audioCurrentTime ) / 10 ) * 100;
+    if(nextPercentLeft <= 0) {
+      this.audioplayer.audioEl.pause();
+      this.props.onMusicTimeout();
+    } else {
+      this.setState({percentLeft: nextPercentLeft});
     }
   }
-  shouldComponentUpdate(nextProps, nextState) {
-    return nextProps.audio !== this.props.audio;
-  }
+  
   
   componentWillReceiveProps(nextProps) {
     // You don't have to do this check first, but it can help prevent an unneeded render
-    if (nextProps.audio !== this.state.audio) {
-      this.setState({ audio: nextProps.audio });
+    if (nextProps.audio !== this.state.audio_url) {
+      this.setState({ audio_url: nextProps.audio });
     }
-  }
-  
-  componentDidUpdate() {
-    this.refs.audio.load();
-    this.refs.audio.play();
   }
   
   render() {
     return (
-      <audio ref="audio" controls autoPlay={true}>
-      <source src={this.state.audio} />
-      </audio>
+      <div>
+      <ReactAudioPlayer ref={(element) => { this.audioplayer = element; }} src={this.state.audio_url} autoPlay listenInterval={10} onListen={this.onListen}/>
+      <CountdownBar width={this.state.percentLeft} />
+      </div>
     );
   }
 }
 
+class CountdownBar extends Component {
+  render() {
+    return (
+      <div className='countdownbar' style={{ width: this.props.width + '%'}} />
+    )
+  }
+}
+
 class QuizQuestion extends Component {
-  constructor(params){
+  constructor(props){
     super();
     this.selectTrack = this.selectTrack.bind(this);
+    this.handleMusicTimeout = this.handleMusicTimeout.bind(this);
   }
   selectTrack(trackId) {
     if(trackId === this.props.correctTrackIndex) {
@@ -82,10 +98,16 @@ class QuizQuestion extends Component {
     }
     this.props.onEndOfQuestion(trackId);
   }
+  
+  handleMusicTimeout() {
+    console.log("track timed out - incorrect answer!");
+    this.props.onEndOfQuestion(-1); // hacky way to do this - need to think about how to do better
+  }
+  
   render() {
     return (
       <div>
-      <MusicPlayer audio={ this.props.audio_url} />
+      <MusicPlayerContainer audio={ this.props.audio_url} onMusicTimeout={this.handleMusicTimeout}/>
       <TrackList tracks= {this.props.tracks} selectTrack={this.selectTrack}/>
       </div>
     );
