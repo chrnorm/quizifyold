@@ -11,9 +11,10 @@ var express = require('express'); // Express web server framework
 var request = require('request'); // "Request" library
 var querystring = require('querystring');
 var cookieParser = require('cookie-parser');
+require('dotenv').config();
 
-var client_id = '68d8d5adac344ad59fa37afc65eb1b13'; // Your client id
-var client_secret = 'c69768a495e647dd9522d2b0257a616f'; // Your secret
+var client_id = process.env.SPOTIFY_ID; // Your client id
+var client_secret = process.env.SPOTIFY_SECRET; // Your secret
 var redirect_uri = 'http://localhost:8888/callback'; // Your redirect uri
 
 /**

@@ -1,4 +1,18 @@
-# Spotify Accounts Authentication Examples
+# Quizify authentication server
+
+## Spotify app setup
+Create a file called `.env` in root folder of auth-server (this folder). The contents of the file should be:
+
+```
+SPOTIFY_ID=<your spotify app ID>
+SPOTIFY_SECRET=<your spotify app secret key>
+```
+
+Where the ID and secret are from your spotify developer account (register a new app with them).
+
+Run the app with `npm start`.
+
+## Spotify Accounts Authentication Examples
 
 This project contains basic demos showing the different OAuth 2.0 flows for [authenticating against the Spotify Web API](https://developer.spotify.com/web-api/authorization-guide/).
 
