@@ -115,6 +115,14 @@ class QuizQuestion extends Component {
   }
 }
 
+class AlbumArtwork extends Component {
+  render() {
+    return (
+      <img src={this.props.albumart} />
+    )
+  }
+}
+
 function QuizAnswer(props) {
   return (
     <div>
@@ -190,6 +198,7 @@ class MusicLibraryContainer extends Component {
     var randomIndexes = [0, 1, 2, 3, 4];
     var correctTrackInd = Math.floor(Math.random() * randomIndexes.length);
     var audio_url = allTracks[randomIndexes[correctTrackInd]].track.preview_url;
+    var albumart = allTracks[randomIndexes[correctTrackInd]].track.album.images[0].url;
     var tracksToUpdate = [];
     console.log("Correct track is " + allTracks[randomIndexes[correctTrackInd]].track.name)
     for (var i in randomIndexes) {
@@ -198,7 +207,7 @@ class MusicLibraryContainer extends Component {
         artist: allTracks[randomIndexes[i]].track.artists[0].name,
       });
     }
-    this.props.onTracksUpdated(tracksToUpdate, correctTrackInd, audio_url);
+    this.props.onTracksUpdated(tracksToUpdate, correctTrackInd, audio_url, albumart);
   }
   
   render() {
@@ -216,7 +225,8 @@ class QuizContainer extends Component {
       correctTrackIndex: 0,
       tracks: [],
       displayingAnswer: true,
-      lastAnswerCorrect: false
+      lastAnswerCorrect: false,
+      albumart: ''
     }
     this.onEndOfQuestion = this.onEndOfQuestion.bind(this);
     this.onTracksUpdated = this.onTracksUpdated.bind(this);
@@ -236,11 +246,12 @@ class QuizContainer extends Component {
     });
   }
   
-  onTracksUpdated(newTracks, newCorrectTrackIndex, newAudioUrl) {
+  onTracksUpdated(newTracks, newCorrectTrackIndex, newAudioUrl, newAlbumart) {
     this.setState({
       tracks: newTracks,
       correctTrackIndex: newCorrectTrackIndex,
-      audio_url: newAudioUrl
+      audio_url: newAudioUrl,
+      albumart: newAlbumart
     });
   }
   
@@ -252,17 +263,16 @@ class QuizContainer extends Component {
     return (
       <div>
       <MusicLibraryContainer access_token={this.token} shouldUpdateTracks={this.state.displayingAnswer} onTracksUpdated={this.onTracksUpdated}/>
-      <ReactCardFlip isFlipped={!this.state.displayingAnswer}>
-      <div className='MainBox' key='front'>
-      <div className='quizanswer'>
-      { this.state.displayingAnswer &&  <QuizAnswer correctAnswer={this.state.lastAnswerCorrect} /> }
-      {this.state.displayingAnswer && <button onClick={() => this.getNextQuestion()}>Get Next Question</button>} 
-      </div>
-      </div>
-      <div className='MainBox' key='back'>
+      {/* <ReactCardFlip isFlipped={!this.state.displayingAnswer}> */}
+        <div className='MainBox' key='back' style={{
+          backgroundImage: `url(${this.state.albumart})`}}>
       { this.state.displayingAnswer || <QuizQuestion correctTrackIndex={this.state.correctTrackIndex} audio_url={this.state.audio_url} tracks={this.state.tracks} onEndOfQuestion={this.onEndOfQuestion} />}
       </div>
-      </ReactCardFlip>
+        <div className='quizanswer'>
+          {this.state.displayingAnswer && <QuizAnswer correctAnswer={this.state.lastAnswerCorrect} />}
+          {this.state.displayingAnswer && <button onClick={() => this.getNextQuestion()}>Get Next Question</button>}
+        </div>
+      {/* </ReactCardFlip> */}
       </div>
     );
   }
